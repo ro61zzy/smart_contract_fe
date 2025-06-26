@@ -10,8 +10,6 @@ const WalletCard = () => {
   const shortenAddress = (addr: string | null) =>
     addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "—";
 
-  console.log("token balance", tokenBalance)
-
   return (
     <div className=" p-1">
       <div className="relative bg-gradient-to-br from-[#57064f] via-[#7e2a77] to-[#a34f9a]

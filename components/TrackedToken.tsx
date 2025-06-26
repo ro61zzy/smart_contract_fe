@@ -34,8 +34,6 @@ const { token, setToken, setTokenBalance } = useToken();
       try {
         const contract = new ethers.Contract(token.address, token.abi, provider);
 
-
-        console.log("contracttttt dataaa", contract)
         const userBalance = await contract.balanceOf(address);
         const totalSupply = await contract.totalSupply();
 
@@ -48,8 +46,6 @@ const { token, setToken, setTokenBalance } = useToken();
 );
 setTotalSupply(totalSupplyFormatted.toString());
         const othersFormatted = totalSupplyFormatted - userBalanceFormatted;
-
-console.log("totalSupply", totalSupply)
 
         setDistributionData([
           { name: "You", value: userBalanceFormatted },
