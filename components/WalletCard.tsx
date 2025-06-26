@@ -13,7 +13,7 @@ const WalletCard = () => {
   return (
     <div className=" p-1">
       <div className="relative bg-gradient-to-br from-[#57064f] via-[#7e2a77] to-[#a34f9a]
-          p-6 rounded-xl shadow-lg text-white w-full h-52 flex flex-col justify-between
+          p-6 rounded-xl shadow-lg text-white w-full h-48 flex flex-col justify-between
           font-mono overflow-hidden">
         <div className="flex flex-col items-start">
           <p className="text-sm font-semibold tracking-wider opacity-80">

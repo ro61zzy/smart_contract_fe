@@ -8,6 +8,7 @@ import TokenTransferFeed from "@/components/TokenTransferFeed";
 import TrackedToken from "@/components/TrackedToken";
 import WalletCard from "@/components/WalletCard";
 import { Sun, Moon } from "lucide-react";
+import MyTransferHistory from "@/components/MyTransferHistory";
 
 export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
