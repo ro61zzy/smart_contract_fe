@@ -10,7 +10,7 @@ import { ethers } from "ethers";
 const COLORS = ["#FF6384", "#36A2EB", "#FFCE56"];
 
 const TrackedToken = () => {
-  const { token, setToken } = useToken();
+const { token, setToken, setTokenBalance } = useToken();
   const { provider, address } = useWeb3();
   const [totalSupply, setTotalSupply] = useState<string | null>(null);
 
@@ -42,6 +42,7 @@ const TrackedToken = () => {
         const userBalanceFormatted = parseFloat(
           ethers.formatUnits(userBalance, token.decimals)
         );
+        setTokenBalance(userBalanceFormatted.toString());
       const totalSupplyFormatted = parseFloat(
   ethers.formatUnits(totalSupply, token.decimals)
 );

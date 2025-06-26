@@ -1,6 +1,7 @@
 import CheckBalanceForAnyAddress from "@/components/CheckBalanceForAnyAddress";
 import ConnectWalletBTN from "@/components/ConnectWalletBTN";
-import TokenActivity from "@/components/TokenActivity";
+import TokenActivityChart from "@/components/TokenActivityChart";
+import TokenTransferFeed from "@/components/TokenTransferFeed";
 import TrackedToken from "@/components/TrackedToken";
 import WalletCard from "@/components/WalletCard";
 import Image from "next/image";
@@ -14,12 +15,16 @@ export default function Home() {
         </h1>
         <ConnectWalletBTN />
       </div>
-      <div className="grid grid-cols-12 gap-1 pt-10">
+      <div className="grid grid-cols-12 gap-1 pt-5">
+           <div className="col-span-4">
+
         <WalletCard />
+         <CheckBalanceForAnyAddress />
+        </div>
         <div className="col-span-8">
           <TrackedToken />
-          <CheckBalanceForAnyAddress />
-          <TokenActivity />
+          <TokenTransferFeed />
+          <TokenActivityChart />
         </div>
       </div>
     </div>
