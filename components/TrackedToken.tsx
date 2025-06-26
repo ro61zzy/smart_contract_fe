@@ -1,14 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-} from "recharts";
 import { useToken } from "@/context/TokenContext";
 import { useWeb3 } from "@/context/Web3Context";
 import { TRACKED_TOKENS } from "@/lib/tokens";
@@ -80,7 +72,7 @@ console.log("totalSupply", totalSupply)
   <h2 className="text-xl font-bold mb-3 text-white">Tracked Tokens</h2>
   <hr className="border-t border-gray-600 mb-4" />
 
-  {/* Token Selector */}
+
   <div className="mb-4">
     <label
       htmlFor="token-select"
@@ -108,7 +100,6 @@ console.log("totalSupply", totalSupply)
     
   </div>
 
-  {/* Token Details */}
   <div className="bg-[#3a0437] p-3 rounded-md text-sm text-gray-200 transition-all duration-200 ease-in-out">
     <p className="text-purple-300 mb-1 font-medium">Selected Token Details:</p>
 
@@ -148,44 +139,6 @@ console.log("totalSupply", totalSupply)
   </div>
 </div>
 
-
-      {/* RIGHT: Pie Chart */}
-      {/* <div className="bg-[#57064f] p-4 rounded-lg flex flex-col justify-center items-center min-h-[300px]">
-        <h2 className="text-xl font-bold mb-2">Supply Distribution</h2>
-        <p className="text-sm text-gray-300 mb-3">
-          Token: <span className="font-medium">{token.name} ({token.symbol})</span>
-        </p>
-        <hr className="border-t border-gray-600 mb-4 w-full" />
-        {distributionData.length === 0 ? (
-          <p>Loading distribution...</p>
-        ) : totalValue === 0 ? (
-          <p>No token data available.</p>
-        ) : (
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={distributionData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, value }) => `${name}: ${formatNumber(value ?? 0)}`}
-              >
-                {distributionData.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value: any) => formatNumber(value)} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        )}
-      </div> */}
     </div>
   );
 };
