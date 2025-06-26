@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -9,62 +9,183 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { useToken } from "@/context/TokenContext";
+import { useWeb3 } from "@/context/Web3Context";
+import { TRACKED_TOKENS } from "@/lib/tokens";
+import { toast } from "react-toastify";
+import { ethers } from "ethers";
+
+const COLORS = ["#FF6384", "#36A2EB", "#FFCE56"];
 
 const TrackedToken = () => {
+  const { token, setToken } = useToken();
+  const { provider, address } = useWeb3();
+  const [totalSupply, setTotalSupply] = useState<string | null>(null);
+
+
+  const [distributionData, setDistributionData] = useState<
+    { name: string; value: number }[]
+  >([]);
+
+  const formatNumber = (num: number) =>
+    new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 4,
+    }).format(num);
+
+  useEffect(() => {
+    const fetchTokenData = async () => {
+      if (!provider || !address || !token?.address || !token?.abi) {
+        console.warn("Missing inputs:", { provider, address, token });
+        return;
+      }
+
+      try {
+        const contract = new ethers.Contract(token.address, token.abi, provider);
+
+
+        console.log("contracttttt dataaa", contract)
+        const userBalance = await contract.balanceOf(address);
+        const totalSupply = await contract.totalSupply();
+
+        const userBalanceFormatted = parseFloat(
+          ethers.formatUnits(userBalance, token.decimals)
+        );
+      const totalSupplyFormatted = parseFloat(
+  ethers.formatUnits(totalSupply, token.decimals)
+);
+setTotalSupply(totalSupplyFormatted.toString());
+        const othersFormatted = totalSupplyFormatted - userBalanceFormatted;
+
+console.log("totalSupply", totalSupply)
+
+        setDistributionData([
+          { name: "You", value: userBalanceFormatted },
+          { name: "Others", value: othersFormatted },
+        ]);
+      } catch (err) {
+        console.error("Fetch failed:", err);
+        toast.error("Error interacting with token contract.");
+      }
+    };
+
+    fetchTokenData();
+  }, [provider, address, token]);
+
+  const totalValue = distributionData.reduce((sum, d) => sum + d.value, 0);
+
   return (
-    <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#2a0827] text-white rounded-lg shadow-xl">
-      <div className="bg-[#57064f] p-4 rounded-lg">
-        <h2 className="text-xl font-bold mb-3">Tracked Tokens</h2>
-        <hr className="border-t border-gray-600 mb-4" />
-        <div className="mb-4">
-          <label
-            htmlFor="token-select"
-            className="block text-gray-300 text-sm font-medium mb-2"
-          >
-            Select a Token:
-          </label>
-          <select
-            id="token-select"
-            //value={}
-            //onChange={}
-            className="block w-full bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-gray-200 focus:ring-purple-500 focus:border-purple-500 transition duration-150 ease-in-out"
-          >
-            <option >token name</option>
-          </select>
-        </div>
+    <div className="text-white rounded-lg  p-1">
+      {/* LEFT: Token Picker */}
+      <div className="bg-[#57064f] p-4 rounded-lg shadow-md">
+  <h2 className="text-xl font-bold mb-3 text-white">Tracked Tokens</h2>
+  <hr className="border-t border-gray-600 mb-4" />
 
+  {/* Token Selector */}
+  <div className="mb-4">
+    <label
+      htmlFor="token-select"
+      className="block text-gray-300 text-sm font-medium mb-2"
+    >
+      Select a Token:
+    </label>
+    <select
+      id="token-select"
+      value={token.symbol}
+      onChange={(e) => {
+        const selected = TRACKED_TOKENS.find(
+          (t) => t.symbol === e.target.value
+        );
+        if (selected) setToken(selected);
+      }}
+      className="block w-full bg-white border border-gray-600 rounded-lg py-3 px-4  text-black focus:ring-purple-500 focus:border-purple-500"
+    >
+      {TRACKED_TOKENS.map((t) => (
+        <option key={t.symbol} value={t.symbol}>
+          {t.name}
+        </option>
+      ))}
+    </select>
+    
+  </div>
+
+  {/* Token Details */}
+  <div className="bg-[#3a0437] p-3 rounded-md text-sm text-gray-200 transition-all duration-200 ease-in-out">
+    <p className="text-purple-300 mb-1 font-medium">Selected Token Details:</p>
+
+    <div className="space-y-1 text-xs text-gray-300">
+      <div className="flex justify-between">
+        <span className="text-gray-400">Name:</span>
+        <span className="font-semibold">{token.name || "—"}</span>
       </div>
+      <div className="flex justify-between">
+        <span className="text-gray-400">Symbol:</span>
+        <span className="font-semibold">{token.symbol || "—"}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-400">Decimals:</span>
+        <span className="font-semibold">{token.decimals || "—"}</span>
+      </div>
+       <div className="flex justify-between">
+        <span className="text-gray-400">Total Suppky:</span>
+        <span className="font-semibold">{totalSupply ? `${parseFloat(totalSupply).toLocaleString()} ${token.symbol}` : "—"}
+</span>
+      </div>
+      <div className="flex justify-between items-start">
+        <span className="text-gray-400">Contract:</span>
+        <span className="font-mono break-all text-right">
+          {token.address}
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(token.address);
+            }}
+            className="ml-2 text-xs bg-gray-600 px-1 py-0.5 rounded hover:bg-gray-500 transition"
+          >
+            Copy
+          </button>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
 
-      <div className="bg-[#57064f] p-4 rounded-lg flex flex-col justify-center items-center min-h-[300px]">
-        <h2 className="text-xl font-bold mb-3">Supply Distribution</h2>
+
+      {/* RIGHT: Pie Chart */}
+      {/* <div className="bg-[#57064f] p-4 rounded-lg flex flex-col justify-center items-center min-h-[300px]">
+        <h2 className="text-xl font-bold mb-2">Supply Distribution</h2>
+        <p className="text-sm text-gray-300 mb-3">
+          Token: <span className="font-medium">{token.name} ({token.symbol})</span>
+        </p>
         <hr className="border-t border-gray-600 mb-4 w-full" />
+        {distributionData.length === 0 ? (
+          <p>Loading distribution...</p>
+        ) : totalValue === 0 ? (
+          <p>No token data available.</p>
+        ) : (
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
-               // data={}
+                data={distributionData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-               
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
+                label={({ name, value }) => `${name}: ${formatNumber(value ?? 0)}`}
               >
-
+                {distributionData.map((_, index) => (
                   <Cell
-                   // key={}
-                    //fill={COLORS}
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
                   />
-      
+                ))}
               </Pie>
-              <Tooltip
-               
-              />
+              <Tooltip formatter={(value: any) => formatNumber(value)} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-
-      </div>
+        )}
+      </div> */}
     </div>
   );
 };

@@ -14,9 +14,9 @@ export default function Home() {
         </h1>
         <ConnectWalletBTN />
       </div>
-      <div className="grid grid-cols-2 gap-2 pt-10">
+      <div className="grid grid-cols-12 gap-1 pt-10">
         <WalletCard />
-        <div>
+        <div className="col-span-8">
           <TrackedToken />
           <CheckBalanceForAnyAddress />
           <TokenActivity />

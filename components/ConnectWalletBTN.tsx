@@ -1,39 +1,32 @@
 "use client"
-
-import React from "react";
-import { ethers } from "ethers";
-
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
+import React, { useState } from "react"
+import { useWeb3 } from "@/context/Web3Context"
 
 const ConnectWalletBTN = () => {
-  let signer = null;
+  const { connectWallet, address } = useWeb3()
+  const [loading, setLoading] = useState(false)
 
-  let provider;
-
-  const connectWallet = async () => {
-    if (window.ethereum == null) {
-      console.log("MetaMask not installed, make sure Metamask is installed");
-      provider = ethers.getDefaultProvider();
-    } else {
-      provider = new ethers.BrowserProvider(window.ethereum);
-      signer = await provider.getSigner();
-      console.log("Wallet connected:", await signer.getAddress());
-    }
-  };
+  const handleConnect = async () => {
+    setLoading(true)
+    await connectWallet()
+    setLoading(false)
+  }
 
   return (
-    <div>
-      <button className="bg-[#89087c] p-2 w-64 rounded-lg" onClick={connectWallet}>
-        <p className=" text-white font-bold">
-Connect Wallet
-          </p>
-      </button>
-    </div>
-  );
-};
+    <button
+      onClick={handleConnect}
+      disabled={loading}
+      className={`bg-[#89087c] p-2 w-64 rounded-lg ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+    >
+      <p className="text-white font-bold">
+        {address
+          ? `Connected: ${address.slice(0, 6)}...${address.slice(-4)}`
+          : loading
+          ? "Connecting..."
+          : "Connect Wallet"}
+      </p>
+    </button>
+  )
+}
 
-export default ConnectWalletBTN;
+export default ConnectWalletBTN
