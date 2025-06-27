@@ -1,0 +1,3 @@
+- develop your own token
+- allow transfer
+- minting
