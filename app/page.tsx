@@ -8,12 +8,13 @@ import TokenTransferFeed from "@/components/TokenTransferFeed";
 import TrackedToken from "@/components/TrackedToken";
 import WalletCard from "@/components/WalletCard";
 import { Sun, Moon } from "lucide-react";
-import MyTransferHistory from "@/components/MyTransferHistory";
+import { useWeb3 } from "@/context/Web3Context";
 
 export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
+  const { provider, address } =  useWeb3(); 
 
-  useEffect(() => {
+ useEffect(() => {
     const saved = localStorage.getItem("theme");
     if (saved === "dark") setDarkMode(true);
   }, []);
@@ -21,6 +22,23 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
+
+  if (!provider || !address) {
+    return (
+      <div
+        className={`${
+          darkMode ? "bg-[#0c0c0c] text-white" : "bg-white text-black"
+        } min-h-screen flex items-center justify-center px-4 md:px-8 py-6 transition-colors duration-300`}
+      >
+        <div className="text-center space-y-4">
+          <h2 className="text-xl sm:text-2xl font-semibold">
+            🚀 Connect your wallet to view the dashboard
+          </h2>
+          <ConnectWalletBTN />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
