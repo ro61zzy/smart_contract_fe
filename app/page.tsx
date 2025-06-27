@@ -52,8 +52,8 @@ export default function Home() {
 
         <div className="md:col-span-8">
           <TrackedToken />
-          <TokenTransferFeed />
           <TokenActivityChart />
+          <TokenTransferFeed />
         </div>
       </div>
     </div>

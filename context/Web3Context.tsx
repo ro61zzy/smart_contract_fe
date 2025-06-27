@@ -37,14 +37,14 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
         if (accounts.length > 0) {
           const _provider = new ethers.BrowserProvider(window.ethereum);
           const network = await _provider.getNetwork();
-console.log("Connected to network:", network.name); // should log 'sepolia'
+//console.log("Connected to network:", network.name); 
 
           const _signer = await _provider.getSigner();
           const _address = await _signer.getAddress();
           setProvider(_provider);
           setSigner(_signer);
           setAddress(_address);
-          console.log("first", _address)
+          //console.log("first", _address)
         }
       } catch (err) {
         console.error("Reconnect error:", err);

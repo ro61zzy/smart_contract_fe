@@ -3,7 +3,6 @@ import "./globals.css";
 import { Web3Provider } from "@/context/Web3Context";
 import { TokenProvider } from "@/context/TokenContext";
 import { ToastContainer } from "react-toastify";
-import { VolumeProvider } from "@/context/VolumeContext";
 
 
 
@@ -22,10 +21,10 @@ export default function RootLayout({
       <body>
         <Web3Provider>
           <TokenProvider>
-            <VolumeProvider>
+
             {children}
              <ToastContainer position="top-right" autoClose={4000} pauseOnHover />
-</VolumeProvider>
+
           </TokenProvider>
         </Web3Provider>
       </body>

@@ -23,91 +23,106 @@ const TokenActivityChart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchRecentTransfers = async () => {
-      if (!provider || !token?.address || !token?.abi) return;
+useEffect(() => {
+  console.log("token:", token);
 
-      try {
-        setLoading(true);
-        setError(null);
+  if (!token?.address || token.decimals === undefined) {
+    console.log("Missing token data, skipping fetch.");
+    return;
+  }
 
-        const latestBlock = await provider.getBlockNumber();
-        const latestBlockData = await provider.getBlock(latestBlock);
-if (!latestBlockData) {
-  setError("Could not fetch latest block data.");
-  setLoading(false);
-  return;
-}
-const now = latestBlockData.timestamp;
+  const rpcProvider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_SEPOLIA_RPC!);
 
+  const fetchRecentTransfers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const minutesBack = 20;
-        const secondsBack = minutesBack * 60;
-        const targetTimestamp = now - secondsBack;
+      const latestBlock = await rpcProvider.getBlockNumber();
+      const blockRange = 300;
+      const fromBlock = Math.max(latestBlock - blockRange, 0);
 
-        // Estimate block range to scan (e.g., ~4s per block on Sepolia)
-        const estimatedBlocks = Math.ceil(secondsBack / 4);
-        const fromBlock = Math.max(latestBlock - estimatedBlocks, 0);
+      console.log("Latest block number:", latestBlock);
+      console.log(`Scanning from block ${fromBlock} to ${latestBlock}`);
 
-        const contract = new ethers.Contract(token.address, token.abi, provider);
+      const transferTopic = ethers.id("Transfer(address,address,uint256)");
 
-        const logs = await contract.queryFilter("Transfer", fromBlock, latestBlock);
+      const logs = await rpcProvider.getLogs({
+        fromBlock,
+        toBlock: latestBlock,
+        address: token.address,
+        topics: [transferTopic],
+      });
 
-        console.log("Fetched logs:", logs.length);
+      const limitedLogs = logs.slice(-200);
+      console.log("Got", limitedLogs.length, "logs");
 
-        const volumePerMinute: { [minute: string]: number } = {};
+      const uniqueBlocks = Array.from(new Set(limitedLogs.map(log => log.blockNumber)));
+      const blockTimestamps: Record<number, number> = {};
 
-        for (let log of logs) {
-          if (!("args" in log) || !log.args?.value) continue;
-
-          const block = await provider.getBlock(log.blockNumber);
-          if (!block || block.timestamp < targetTimestamp) continue;
-
-          const value = parseFloat(
-            ethers.formatUnits(log.args.value, token.decimals)
-          );
-
-          const date = new Date(block.timestamp * 1000);
-          const minuteStr = `${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
-
-          if (!volumePerMinute[minuteStr]) volumePerMinute[minuteStr] = 0;
-          volumePerMinute[minuteStr] += value;
-        }
-
-        const formattedData = Object.entries(volumePerMinute).map(
-          ([time, volume]) => ({
-            time,
-           volume,
-          })
-        );
-
-        
-
-        formattedData.sort(
-          (a, b) => new Date(`1970-01-01T${a.time}:00Z`).getTime() - new Date(`1970-01-01T${b.time}:00Z`).getTime()
-        );
-
-        setChartData(formattedData);
-      } catch (err) {
-        console.error("Chart error:", err);
-        setError("Could not load recent transfers.");
-      } finally {
-        setLoading(false);
+      for (let block of uniqueBlocks) {
+        const blk = await rpcProvider.getBlock(block);
+        if (blk) blockTimestamps[block] = blk.timestamp;
+        await new Promise((res) => setTimeout(res, 100)); // slow down
       }
-    };
 
-    fetchRecentTransfers();
-  }, [provider, token]);
+      const volumePerMinute: { [minute: string]: number } = {};
+
+      for (let log of limitedLogs) {
+        const valueHex = log.data;
+        const value = parseFloat(ethers.formatUnits(valueHex, token.decimals));
+
+        const timestamp = blockTimestamps[log.blockNumber];
+        if (!timestamp) continue;
+
+        const date = new Date(timestamp * 1000);
+        const minuteStr = date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+
+        volumePerMinute[minuteStr] = (volumePerMinute[minuteStr] || 0) + value;
+      }
+
+      const formattedData = Object.entries(volumePerMinute).map(([time, volume]) => ({
+        time,
+        volume: Number(volume.toFixed(4)),
+      }));
+
+      formattedData.sort((a, b) => a.time.localeCompare(b.time));
+      setChartData(formattedData);
+     // console.log("Chart data ready:", formattedData.slice(0, 5));
+    } catch (err) {
+      console.error("Chart error:", err);
+      setError("Failed to load data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchRecentTransfers();
+
+  const interval = setInterval(fetchRecentTransfers, 60_000); //run every 60 seconds
+
+  return () => clearInterval(interval);
+}, [token?.address, token?.decimals]);
+
+
 
   return (
     <div className="p-1">
       <div className="bg-[#57064f] text-white p-4 rounded-lg">
-        <h2 className="text-lg font-bold mb-3">Transfer Volume (Last 20 Minutes)</h2>
+        <h2 className="text-lg font-bold mb-3">
+          Transfer Volume (Last 20 Minutes)
+        </h2>
 
         {loading ? (
           <p className="text-center text-sm text-gray-300">Loading chart...</p>
         ) : chartData.length === 0 ? (
-          <p className="text-center text-sm text-gray-400">No recent transfer volume.</p>
+          <p className="text-center text-sm text-gray-400">
+            No recent transfer volume.
+          </p>
         ) : (
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={chartData}>
