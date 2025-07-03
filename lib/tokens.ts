@@ -1,5 +1,5 @@
 
-import { ERC20_ABI, WETH_ABI, USDC_ABI } from "./abis"
+import { ERC20_ABI, WETH_ABI, USDC_ABI, myTokenABI } from "./abis"
 
 export interface Token {
   name: string
@@ -44,5 +44,12 @@ export const TRACKED_TOKENS: Token[] = [
     address: "0x779877A7B0D9E8603169DdbD7836e478b4624789",
     decimals: 18,
     abi: ERC20_ABI,
+  },
+   {
+    name: "My Token (Testnet)",
+    symbol: "MTN",
+    address: "0x9aEfeE1e24fa945FcD0f09bc305a7DcBDC73a854",
+    decimals: 18,
+    abi: myTokenABI,
   },
 ]

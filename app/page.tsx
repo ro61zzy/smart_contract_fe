@@ -9,10 +9,14 @@ import TrackedToken from "@/components/TrackedToken";
 import WalletCard from "@/components/WalletCard";
 import { Sun, Moon } from "lucide-react";
 import { useWeb3 } from "@/context/Web3Context";
+import GetMyToken from "@/components/GetMyToken";
+import { useToken } from "@/context/TokenContext";
+import SendMyToken from "@/components/SendMyToken";
 
 export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
   const { provider, address } =  useWeb3(); 
+    const { token } = useToken();
 
  useEffect(() => {
     const saved = localStorage.getItem("theme");
@@ -66,12 +70,16 @@ export default function Home() {
         <div className="md:col-span-4">
           <WalletCard />
           <CheckBalanceForAnyAddress />
+           {token.symbol === "MTN" && <GetMyToken />}
         </div>
 
         <div className="md:col-span-8">
           <TrackedToken />
+            {token.symbol === "MTN" && <SendMyToken />}
           <TokenActivityChart />
           <TokenTransferFeed />
+        
+
         </div>
       </div>
     </div>

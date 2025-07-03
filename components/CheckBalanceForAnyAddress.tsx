@@ -17,6 +17,8 @@ const CheckBalanceForAnyAddress = () => {
       return;
     }
 
+    
+
     try {
       setLoading(true);
       const provider = new ethers.BrowserProvider(window.ethereum);
